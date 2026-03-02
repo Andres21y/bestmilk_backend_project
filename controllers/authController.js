@@ -1,0 +1,108 @@
+import User from '../models/User.js';    // Importar el modelo de usuario desde MongoDB
+import bcrypt from 'bcryptjs';          // Librería para encriptar y comparar contraseñas
+import jwt from 'jsonwebtoken';        // Librería para generar y verificar tokens JWT
+import crypto from 'crypto';           // Módulo nativo de Node.js para generar tokens aleatorios seguros
+import nodemailer from 'nodemailer';   // Librería para enviar correos electrónicos
+
+export const login = async (req, res) => {
+
+    // Normalizamos el email (sin espacios y en minúsculas)
+    const email = req.body.email.trim().toLowerCase();
+    const { password } = req.body;
+
+    try {
+        // Buscamos al usuario en la base de datos
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ msg: "User not found" });
+
+        // Comparamos la contraseña ingresada con la encriptada en la db
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ msg: "Incorrect password" });
+
+        // Generamos un token JWT con datos del usuario
+        const token = jwt.sign(
+            { id: user._id, rol: user.rol },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' } // El token expira en 1 hora
+        );
+
+        // Respondemos con el token y los datos del usuario
+        res.json({
+            token,
+            user: {
+                name: user.name,
+                email: user.email,
+                rol: user.rol
+            }
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        // Verificamos si el usuario existe
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ msg: "User does not exist" });
+
+        // Generamos un token aleatorio y lo guardamos en el usuario
+        const token = crypto.randomBytes(20).toString('hex');
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hora de validez
+        await user.save();
+
+        // Configuramos el transporte de correo (ejemplo con Gmail)
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        // URL de recuperación 
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+        // Enviamos el correo con el enlace de recuperación
+        await transporter.sendMail({
+            to: user.email,
+            subject: 'Password Recovery - BestMilk',
+            text: `Reset your password here: ${resetUrl}`
+        });
+
+        res.json({ msg: "Email sent successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    const { password } = req.body;
+    try {
+        // Buscamos al usuario con el token válido y no expirado
+        const user = await User.findOne({
+            resetPasswordToken: req.params.token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) return res.status(400).json({ msg: "Invalid or expired token" });
+
+        // Encriptamos la nueva contraseña
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+
+        // Limpiamos los campos de recuperación
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        // Guardamos los cambios
+        await user.save();
+
+        res.json({ msg: "Password successfully updated" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
