@@ -4,6 +4,57 @@ import jwt from 'jsonwebtoken';        // Librería para generar y verificar tok
 import crypto from 'crypto';           // Módulo nativo de Node.js para generar tokens aleatorios seguros
 import nodemailer from 'nodemailer';   // Librería para enviar correos electrónicos
 
+export const signup = async (req, res) => {
+
+    const { nit, name, last_name, email, password, phone, address } = req.body;
+
+    try {
+        // 1. Verificar si el usuario ya existe (por email o nit)
+        let userExists = await User.findOne({ $or: [{ email }, { nit }] });
+        
+        if (userExists) {
+            return res.status(400).json({ msg: "El usuario o NIT ya se encuentra registrado" });
+        }
+
+        // 2. Encriptar contraseña
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // 3. Crear el nuevo usuario
+        const newUser = new User({
+            nit,
+            name,
+            last_name,
+            email: email.toLowerCase().trim(),
+            password: hashedPassword,
+            phone,
+            address,
+            date_register: new Date()
+        });
+
+        // 4. Guardar en BD
+        await newUser.save();
+
+        // 5. Opcional: Generar token para loguearlo automáticamente tras el registro
+        const token = jwt.sign({ id: newUser._id, rol: newUser.rol }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(201).json({
+            msg: "Usuario registrado exitosamente",
+            token,
+            user: {
+                name: newUser.name,
+                email: newUser.email,
+                rol: newUser.rol
+            }
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ msg: "Error al registrar usuario", error: err.message });
+    }
+
+};
+
 export const login = async (req, res) => {
 
     // Normalizamos el email (sin espacios y en minúsculas)
