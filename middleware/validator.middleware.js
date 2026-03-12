@@ -106,6 +106,7 @@ const validateRecord = [
         next();
     }
 ];
+
 const validateProduction = [
     check('cattle_id', 'Invalid cattle identification').isMongoId(),
     check('milking_date', 'A valid date and time is required').isISO8601(),
@@ -123,6 +124,7 @@ const validateProduction = [
         next();
     }
 ];
+
 export default {
     validateRegister,
     validateLogin,
