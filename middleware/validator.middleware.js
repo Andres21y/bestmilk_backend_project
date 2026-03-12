@@ -74,9 +74,25 @@ const validateCattle = [
     }
 ];
 
+const validateVaccine = [
+    check('name', 'Vaccine name is required').not().isEmpty().trim(),
+    check('company', 'Laboratory or company name is required').not().isEmpty().trim(),
+    check('lote', 'Batch number (lote) is required').not().isEmpty().trim(),
+    check('expiration_date', 'A valid expiration date is required').isISO8601(),
+    
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ ok: false, errors: errors.array() });
+        }
+        next();
+    }
+];
+
 export default {
     validateRegister,
     validateLogin,
     validateBreed,
-    validateCattle
+    validateCattle,
+    validateVaccine
 }
