@@ -143,6 +143,23 @@ const validateCalving = [
     }
 ];
 
+const validateHealth = [
+    check('cattle_id', 'Invalid cattle identification').isMongoId(),
+    check('inspection_date', 'A valid date is required').isISO8601(),
+    check('state', 'State must be ILLNESS, INJURY, or CHECKUP').isIn(['ILLNESS', 'INJURY', 'CHECKUP']),
+    check('dosage', 'Dosage must be a number').optional({ nullable: true }).isFloat({ min: 0 }),
+    check('diagnosis', 'Diagnosis cannot exceed 255 characters').optional().isLength({ max: 255 }),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Log de error de validación
+            console.warn("Health record validation failed:", errors.array());
+            return res.status(400).json({ ok: false, errors: errors.array() });
+        }
+        next();
+    }
+];
 export default {
     validateRegister,
     validateLogin,
@@ -151,5 +168,6 @@ export default {
     validateVaccine,
     validateRecord,
     validateProduction,
-    validateCalving
+    validateCalving,
+    validateHealth
 }
