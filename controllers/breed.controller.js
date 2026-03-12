@@ -1,4 +1,4 @@
-import Breed from '../models/Breed.js';
+import Breed from '../models/Breed.model.js';
 
 // Create
 export const createBreeds = async (req, res) => {
@@ -19,16 +19,16 @@ export const createBreeds = async (req, res) => {
         }
 
         // Si es un solo objeto
-        const { name, descripcion } = data;
+        const { name, description } = data;
 
         // Verificar si ya existe
-        const exists = await Breed.findOne({ nombre: name.trim() });
+        const exists = await Breed.findOne({ name: name.trim() });
         if (exists) {
             console.warn(`Duplicate breed insertion attempt. Name: ${name}`);
             return res.status(400).json({ msg: "The request could not be processed" });
         }
 
-        const newBreed = new Breed({ name, descripcion });
+        const newBreed = new Breed({ name, description });
         await newBreed.save();
 
         console.info(`Breed created successfully. Name: ${name}`);

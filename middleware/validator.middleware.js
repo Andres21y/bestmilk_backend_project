@@ -37,7 +37,7 @@ const validateLogin = [
     }
 ];
 
-// Reglas para la RAZA
+// Reglas para la BRED
 const validateBreed = [
     check('name', 'The breed name is required and must be at least 3 characters long.').not().isEmpty().trim().isLength({ min: 3 }),
     check('description', 'The description cannot exceed 200 characters').optional().isLength({ max: 200 }),
