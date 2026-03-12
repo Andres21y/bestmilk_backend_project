@@ -1,28 +1,17 @@
+import mongoose from 'mongoose';
 import Breed from '../models/Breed.model.js';
+import Cattle from '../models/Cattle.model.js';
 
 // Create
 export const createBreeds = async (req, res) => {
+
+    const { name, description } = req.body;
+
     try {
-        const data = req.body;
 
-        // Si data es un arreglo, usamos insertMany
-        if (Array.isArray(data)) {
-            // Validamos que no esté vacío
-            if (data.length === 0) {
-                console.warn("Attempted to insert empty array of breeds");
-                return res.status(400).json({ msg: "Invalid request" });
-            }
-
-            const newBreeds = await Breed.insertMany(data);
-            console.info("Breeds inserted successfully (bulk)");
-            return res.status(201).json({ msg: "Process completed successfully", newBreeds });
-        }
-
-        // Si es un solo objeto
-        const { name, description } = data;
-
-        // Verificar si ya existe
+        // Verificamos si ya existe
         const exists = await Breed.findOne({ name: name.trim() });
+
         if (exists) {
             console.warn(`Duplicate breed insertion attempt. Name: ${name}`);
             return res.status(400).json({ msg: "The request could not be processed" });
@@ -31,14 +20,11 @@ export const createBreeds = async (req, res) => {
         const newBreed = new Breed({ name, description });
         await newBreed.save();
 
-        console.info(`Breed created successfully. Name: ${name}`);
+        console.info(`Breed created successfully - {Name: ${name}}`);
         res.status(201).json({ msg: "Process completed successfully", newBreed });
 
     } catch (error) {
-        // Log interno con detalle del error
         console.error("Error creating breed:", error);
-
-        // Mensaje genérico para el cliente
         res.status(500).json({ msg: "Internal server error" });
     }
 };
@@ -61,14 +47,19 @@ export const getBreeds = async (req, res) => {
 
 // Update
 export const updateBreed = async (req, res) => {
+
+    const { id } = req.params;
+    const { name, description } = req.body;
+
     try {
-        const { id } = req.params;
-        const { name, descripcion } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ msg: "Invalid data" });
+        }
 
         // Buscar y actualizar. { new: true } devuelve el documento modificado
         const updatedBreed = await Breed.findByIdAndUpdate(
             id,
-            { name, descripcion },
+            { name, description },
             { new: true, runValidators: true }
         );
 
@@ -88,8 +79,13 @@ export const updateBreed = async (req, res) => {
 
 // Delete
 export const deleteBreed = async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ msg: "Invalid data" });
+        }
 
         // No eliminar si la raza está siendo utilizada por algún ganado
         const isUsed = await Cattle.findOne({ breed_id: id });
@@ -102,7 +98,7 @@ export const deleteBreed = async (req, res) => {
         const breed = await Breed.findByIdAndDelete(id);
 
         if (!breed) {
-            console.warn(`Raza no encontrada para eliminar. ID: ${id}`);
+            console.warn(`Breed no found. ID: ${id}`);
             return res.status(404).json({ msg: "Resource not available" });
         }
 
