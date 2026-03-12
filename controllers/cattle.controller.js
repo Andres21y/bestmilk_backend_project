@@ -1,5 +1,4 @@
-import Cattle from '../models/Cattle.js';
-import Production from '../models/Production.js';
+import { Cattle, Production} from '../models/index.js';
 
 export const createCattle = async (req, res) => {
     try {

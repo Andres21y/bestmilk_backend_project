@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import Breed from '../models/Breed.model.js';
-import Cattle from '../models/Cattle.model.js';
+import { Breed, Cattle } from '../models/index.js';
 
 // Create
 export const createBreeds = async (req, res) => {
