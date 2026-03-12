@@ -2,6 +2,8 @@ import express from 'express';
 import authRoutes from './auth.routes.js';
 import adminRoutes from './admin.routes.js';
 import breedRoutes from './breed.routes.js';
+import cattleRoutes from './cattle.routes.js';
+
 
 const router = express.Router();
 
@@ -9,5 +11,6 @@ const router = express.Router();
 router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 router.use('/breed', breedRoutes);
+router.use('/cattle', cattleRoutes);
 
 export default router;
