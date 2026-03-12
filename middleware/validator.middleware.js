@@ -89,7 +89,7 @@ const validateVaccine = [
     }
 ];
 
-const validateVaccRecord = [
+const validateRecord = [
     check('cattle_id', 'Valid Cattle ID is required').isMongoId(),
     check('vaccine_id', 'Valid Vaccine ID is required').isMongoId(),
     check('application_date', 'A valid application date is required').isISO8601(),
@@ -112,5 +112,5 @@ export default {
     validateBreed,
     validateCattle,
     validateVaccine,
-    validateVaccRecord
+    validateRecord
 }
