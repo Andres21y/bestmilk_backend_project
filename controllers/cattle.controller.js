@@ -1,4 +1,4 @@
-import { Cattle} from '../models/index.js';
+import { Cattle } from '../models/index.js';
 
 // Crear una nueva res
 export const createCattle = async (req, res) => {
@@ -9,7 +9,7 @@ export const createCattle = async (req, res) => {
         res.status(201).json({ msg: "Process successfully", cattle: newCattle });
 
     } catch (error) {
-        console.error("Create Cattle Error:", error);
+        console.error("Error creating cattle:", error);
         res.status(500).json({ msg: "An error occurred while registering the animal" });
     }
 };
@@ -27,7 +27,8 @@ export const getAllCattle = async (req, res) => {
         res.json(animals);
 
     } catch (error) {
-        res.status(500).json({ msg: "Could not retrieve cattle data" });
+        console.error("Error retrieving cattles:", error);
+        res.status(500).json({ msg: "Internal server error" });
     }
 };
 
@@ -44,7 +45,8 @@ export const getCattleById = async (req, res) => {
         res.json(animal);
 
     } catch (error) {
-        res.status(500).json({ msg: "Error fetching resource" });
+        console.error("Error retrieving cattle:", error);
+        res.status(500).json({ msg: "Internal server error" });
     }
 };
 
@@ -61,7 +63,7 @@ export const updateCattle = async (req, res) => {
         res.json({ msg: "The process has been successful", cattle: updatedAnimal });
 
     } catch (error) {
-        res.status(500).json({ msg: "Error updating information" });
+        res.status(500).json({ msg: "Internal server error" });
     }
 };
 
@@ -85,6 +87,7 @@ export const deleteCattle = async (req, res) => {
         res.json({ msg: "The process has been successful" });
 
     } catch (error) {
-        res.status(500).json({ msg: "Error deleting the record" });
+        console.error("Error deleting cattle:", error);
+        res.status(500).json({ msg: "Internal server error" });
     }
 };
