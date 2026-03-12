@@ -125,6 +125,24 @@ const validateProduction = [
     }
 ];
 
+const validateCalving = [
+    check('cattle_id', 'Invalid cattle identification').isMongoId(),
+    check('calving_date', 'A valid date is required').isISO8601(),
+    check('number_babys', 'Number of offspring must be at least 1').isInt({ min: 1 }),
+    check('complication', 'Complication must be a boolean value').isBoolean(),
+    check('observations', 'Observations cannot exceed 150 characters').optional().isLength({ max: 150 }),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Log interno de errores de validación
+            console.warn("Calving validation failed:", errors.array());
+            return res.status(400).json({ ok: false, errors: errors.array() });
+        }
+        next();
+    }
+];
+
 export default {
     validateRegister,
     validateLogin,
@@ -132,5 +150,6 @@ export default {
     validateCattle,
     validateVaccine,
     validateRecord,
-    validateProduction
+    validateProduction,
+    validateCalving
 }
