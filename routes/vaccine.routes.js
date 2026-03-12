@@ -20,3 +20,5 @@ router.get('/', getAllVaccines);
 router.post('/', [isAdmin, validation.validateVaccine], createVaccine);
 router.put('/:id', [isAdmin, validation.validateVaccine], updateVaccine);
 router.delete('/:id', isAdmin, deleteVaccine);
+
+export default router;

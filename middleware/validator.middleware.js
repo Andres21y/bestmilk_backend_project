@@ -64,7 +64,7 @@ const validateCattle = [
     check('breed_id', 'Valid Breed ID is required').isMongoId(),
     check('mother_id', 'Invalid Mother ID').optional({ nullable: true }).isMongoId(),
     check('father_id', 'Invalid Father ID').optional({ nullable: true }).isMongoId(),
-    
+
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -79,7 +79,7 @@ const validateVaccine = [
     check('company', 'Laboratory or company name is required').not().isEmpty().trim(),
     check('lote', 'Batch number (lote) is required').not().isEmpty().trim(),
     check('expiration_date', 'A valid expiration date is required').isISO8601(),
-    
+
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -89,10 +89,28 @@ const validateVaccine = [
     }
 ];
 
+const validateVaccRecord = [
+    check('cattle_id', 'Valid Cattle ID is required').isMongoId(),
+    check('vaccine_id', 'Valid Vaccine ID is required').isMongoId(),
+    check('application_date', 'A valid application date is required').isISO8601(),
+    check('dose', 'Dose must be a positive number').isFloat({ min: 0.1 }),
+    check('next_dose', 'Next dose must be a valid date').optional({ nullable: true }).isISO8601(),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Log de error de validación
+            console.warn("Validation failed for vaccination record");
+            return res.status(400).json({ ok: false, errors: errors.array() });
+        }
+        next();
+    }
+];
 export default {
     validateRegister,
     validateLogin,
     validateBreed,
     validateCattle,
-    validateVaccine
+    validateVaccine,
+    validateVaccRecord
 }
