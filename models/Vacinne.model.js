@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 const vaccineSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -18,4 +20,4 @@ const vaccineSchema = new mongoose.Schema({
     description: String
 }, { timestamps: true });
 vaccineSchema.index({ lote: 1, company: 1 }, { unique: true }); // Índice único compuesto
-export const Vaccine = mongoose.model('Vaccine', vaccineSchema);
+export default mongoose.model('Vaccine', vaccineSchema);

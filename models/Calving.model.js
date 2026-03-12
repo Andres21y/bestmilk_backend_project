@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 const calvingSchema = new mongoose.Schema({
     cattle_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -10,4 +12,4 @@ const calvingSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     observations: String
 }, { timestamps: true });
-export const Calving = mongoose.model('Calving', calvingSchema);
+export default mongoose.model('Calving', calvingSchema);

@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 const healthSchema = new mongoose.Schema({
     cattle_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -22,4 +24,4 @@ const healthSchema = new mongoose.Schema({
     dosage: Number,
     observations: String
 }, { timestamps: true });
-export const Health = mongoose.model('Health', healthSchema);
+export default mongoose.model('Health', healthSchema);

@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 const vaccinationRecordSchema = new mongoose.Schema({
     cattle_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -21,4 +23,4 @@ const vaccinationRecordSchema = new mongoose.Schema({
     next_dose: Date,
     observations: String
 });
-export const Vaccination = mongoose.model('Vaccination', vaccinationRecordSchema);
+export default mongoose.model('Vaccination', vaccinationRecordSchema);
