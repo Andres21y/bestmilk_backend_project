@@ -1,5 +1,4 @@
-import { Calving } from '../models/Calving.js';
-import Cattle from '../models/Cattle.js';
+import { Calving, Cattle } from '../models/index.js';
 
 // Registrar un nuevo parto
 export const addCalving = async (req, res) => {
@@ -54,7 +53,7 @@ export const getCalvingHistory = async (req, res) => {
             .sort({ calving_date: -1 });
 
         res.json(history);
-        
+
     } catch (error) {
         console.error("Error fetching calving history:", error.message);
         res.status(500).json({ msg: "Failed to retrieve calving data" });
