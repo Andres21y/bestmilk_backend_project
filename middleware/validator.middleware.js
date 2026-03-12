@@ -106,11 +106,29 @@ const validateRecord = [
         next();
     }
 ];
+const validateProduction = [
+    check('cattle_id', 'Invalid cattle identification').isMongoId(),
+    check('milking_date', 'A valid date and time is required').isISO8601(),
+    check('amount_milk', 'Milk amount must be a positive number').isFloat({ min: 0.01 }),
+    check('time_extraction', 'Extraction time must be a positive number (minutes)').isInt({ min: 1 }),
+    check('observation', 'Observations cannot exceed 100 characters').optional().isLength({ max: 100 }),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Log interno de errores de validación
+            console.warn("Validation error in Production data:", errors.array());
+            return res.status(400).json({ ok: false, errors: errors.array() });
+        }
+        next();
+    }
+];
 export default {
     validateRegister,
     validateLogin,
     validateBreed,
     validateCattle,
     validateVaccine,
-    validateRecord
+    validateRecord,
+    validateProduction
 }
