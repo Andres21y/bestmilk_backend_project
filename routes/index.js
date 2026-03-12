@@ -7,6 +7,7 @@ import vaccineRoutes from './vaccine.routes.js';
 import vaccinationRoutes from './vaccination.routes.js';
 import productionRoutes from './production.routes.js';
 import calvingRoutes from './calving.routes.js';
+import healthRoutes from './health.routes.js';
 
 const router = express.Router();
 
@@ -17,6 +18,8 @@ router.use('/breed', breedRoutes);
 router.use('/cattle', cattleRoutes);
 router.use('/vaccine', vaccineRoutes);
 router.use('/vaccination', vaccinationRoutes);
+router.use('/production', productionRoutes);
 router.use('/calving', calvingRoutes);
+router.use('/health', healthRoutes);
 
 export default router;
