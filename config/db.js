@@ -10,9 +10,8 @@ const connectDB = async () => {
         console.log("Successful connection to the database");
 
     } catch (err) {
-        // Si ocurre un error, lo mostramos en consola con detalles
         console.error("Database connection error:", err.message);
-
+        
         // process.exit(1) detiene la aplicación indicando que hubo un error crítico
         process.exit(1);
     }

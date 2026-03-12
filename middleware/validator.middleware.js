@@ -57,8 +57,26 @@ const validateBreed = [
     }
 ];
 
+const validateCattle = [
+    check('name', 'Name is required').not().isEmpty().trim(),
+    check('date_birthday', 'A valid birth date is required').isISO8601(),
+    check('gender', 'Gender must be male or female').isIn(['male', 'female']),
+    check('breed_id', 'Valid Breed ID is required').isMongoId(),
+    check('mother_id', 'Invalid Mother ID').optional({ nullable: true }).isMongoId(),
+    check('father_id', 'Invalid Father ID').optional({ nullable: true }).isMongoId(),
+    
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ ok: false, errors: errors.array() });
+        }
+        next();
+    }
+];
+
 export default {
     validateRegister,
     validateLogin,
-    validateBreed
+    validateBreed,
+    validateCattle
 }
