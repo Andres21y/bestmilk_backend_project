@@ -4,7 +4,7 @@ import {
     updateBreed as update, deleteBreed as drop
 } from '../controllers/breed.controller.js';
 import { verifyToken, isAdmin } from '../middleware/auth.middleware.js';
-import validation from '../middleware/validator.middleware.js';
+import { validateBreed } from '../middleware/validator.middleware.js';
 
 const router = express.Router();
 
@@ -12,8 +12,8 @@ const router = express.Router();
 router.get('/', verifyToken, read);
 
 // Admin-only access (Write/Modify/Delete)
-router.post('/', [verifyToken, isAdmin, validation.validateBreed], create);
-router.put('/:id', [verifyToken, isAdmin, validation.validateBreed], update);
+router.post('/', [verifyToken, isAdmin, validateBreed], create);
+router.put('/:id', [verifyToken, isAdmin, validateBreed], update);
 router.delete('/:id', [verifyToken, isAdmin], drop);
 
 export default router;

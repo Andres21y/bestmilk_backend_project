@@ -1,12 +1,12 @@
 import express from 'express';
-import { 
-    addHealthRecord, 
-    getHealthHistory, 
+import {
+    addHealthRecord,
+    getHealthHistory,
     updateHealthRecord,
-    deleteHealthRecord 
+    deleteHealthRecord
 } from '../controllers/health.controller.js';
 import { verifyToken, isAdmin } from '../middleware/auth.middleware.js';
-import validation from '../middleware/validator.middleware.js';
+import { validateHealth } from '../middleware/validator.middleware.js';
 
 const router = express.Router();
 
@@ -15,10 +15,10 @@ router.use(verifyToken);
 
 // Rutas de consulta y creación (Admin y Visitors aprobados)
 router.get('/', getHealthHistory);
-router.post('/', validation.validateHealth, addHealthRecord);
+router.post('/', validateHealth, addHealthRecord);
 
 // Rutas de modificación y eliminación (Solo Admin)
-router.put('/:id', isAdmin, validation.validateHealth, updateHealthRecord);
+router.put('/:id', isAdmin, validateHealth, updateHealthRecord);
 router.delete('/:id', isAdmin, deleteHealthRecord);
 
 export default router;

@@ -1,173 +1,107 @@
 import { check, validationResult } from 'express-validator';
 
+const handleValidationErrors = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        console.warn(`[Validation Error] ${req.path}`, errors.array());
+        return res.status(400).json({ ok: false, errors: errors.array() });
+    }
+    next();
+};
+
+// Validadores reutilizables
+const cattleIdValidator = check('cattle_id', 'Invalid cattle identification').isMongoId();
+const dateValidator = (field, label = null) =>
+    check(field, `A valid ${label || field.replace('_', ' ')} is required`).isISO8601();
+
 // Reglas para el REGISTRO
-const validateRegister = [
-    check('nit', 'The NIT is required').not().isEmpty().trim(),
+export const validateRegister = [
+    check('nit', 'The NIT is required').notEmpty().trim(),
     check('name', 'The name is required and must have at least 4 characters').isLength({ min: 4 }).trim(),
-    check('last_name', 'The last name is required').not().isEmpty().trim(),
+    check('last_name', 'The last name is required').notEmpty().trim(),
     check('email', 'Please enter a valid email address').isEmail().normalizeEmail(),
     check('password', 'The password must be at least 8 characters long, include an uppercase letter and a number')
-        .isLength({ min: 8 }).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
-    check('phone', 'The phone number must be valid').optional().isNumeric(),
-
-    // Función que captura los errores y los envía al cliente
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                ok: false,
-                errors: errors.array() // Enviamos la lista de errores detallada
-            });
-        }
-        next();
-    }
+        .isLength({ min: 8 })
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
+    check('phone', 'The phone number must be valid').optional({ checkFalsy: true }).isNumeric(),
+    handleValidationErrors
 ];
 
 // Reglas para el LOGIN
-const validateLogin = [
+export const validateLogin = [
     check('email', 'A valid email is required').isEmail().normalizeEmail(),
-    check('password', 'Password is required').not().isEmpty(),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+    check('password', 'Password is required').notEmpty(),
+    handleValidationErrors
 ];
 
 // Reglas para la BREED
-const validateBreed = [
+export const validateBreed = [
     check('name', 'The breed name is required and must be at least 3 characters long.')
-        .not()
-        .isEmpty()
-        .trim()
-        .isLength({ min: 3 }),
+        .isLength({ min: 3 })
+        .trim(),
     check('description', 'The description cannot exceed 200 characters')
-        .optional()
+        .optional({ checkFalsy: true })
         .isLength({ max: 200 }),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+    handleValidationErrors
 ];
 
-const validateCattle = [
-    check('name', 'Name is required').not().isEmpty().trim(),
-    check('date_birthday', 'A valid birth date is required').isISO8601(),
+// Reglas para CATTLE
+export const validateCattle = [
+    check('name', 'Name is required').notEmpty().trim(),
+    dateValidator('date_birthday', 'birth date'),
     check('gender', 'Gender must be male or female').isIn(['male', 'female']),
     check('breed_id', 'Valid Breed ID is required').isMongoId(),
     check('mother_id', 'Invalid Mother ID').optional({ nullable: true }).isMongoId(),
     check('father_id', 'Invalid Father ID').optional({ nullable: true }).isMongoId(),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+    handleValidationErrors
 ];
 
-const validateVaccine = [
-    check('name', 'Vaccine name is required').not().isEmpty().trim(),
-    check('company', 'Laboratory or company name is required').not().isEmpty().trim(),
-    check('lote', 'Batch number (lote) is required').not().isEmpty().trim(),
-    check('expiration_date', 'A valid expiration date is required').isISO8601(),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+// Reglas para VACCINE
+export const validateVaccine = [
+    check('name', 'Vaccine name is required').notEmpty().trim(),
+    check('company', 'Laboratory or company name is required').notEmpty().trim(),
+    check('lote', 'Batch number (lote) is required').notEmpty().trim(),
+    dateValidator('expiration_date', 'expiration date'),
+    handleValidationErrors
 ];
 
-const validateRecord = [
+// Reglas para RECORD
+export const validateRecord = [
     check('cattle_id', 'Valid Cattle ID is required').isMongoId(),
     check('vaccine_id', 'Valid Vaccine ID is required').isMongoId(),
-    check('application_date', 'A valid application date is required').isISO8601(),
+    dateValidator('application_date', 'application date'),
     check('dose', 'Dose must be a positive number').isFloat({ min: 0.1 }),
     check('next_dose', 'Next dose must be a valid date').optional({ nullable: true }).isISO8601(),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            // Log de error de validación
-            console.warn("Validation failed for vaccination record");
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+    handleValidationErrors
 ];
 
-const validateProduction = [
-    check('cattle_id', 'Invalid cattle identification').isMongoId(),
-    check('milking_date', 'A valid date and time is required').isISO8601(),
+// Reglas para PRODUCTION
+export const validateProduction = [
+    cattleIdValidator,
+    dateValidator('milking_date', 'milking date'),
     check('amount_milk', 'Milk amount must be a positive number').isFloat({ min: 0.01 }),
     check('time_extraction', 'Extraction time must be a positive number (minutes)').isInt({ min: 1 }),
-    check('observation', 'Observations cannot exceed 100 characters').optional().isLength({ max: 100 }),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            // Log interno de errores de validación
-            console.warn("Validation error in Production data:", errors.array());
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+    check('observation', 'Observations cannot exceed 100 characters').optional({ checkFalsy: true }).isLength({ max: 100 }),
+    handleValidationErrors
 ];
 
-const validateCalving = [
-    check('cattle_id', 'Invalid cattle identification').isMongoId(),
-    check('calving_date', 'A valid date is required').isISO8601(),
+// Reglas para CALVING
+export const validateCalving = [
+    cattleIdValidator,
+    dateValidator('calving_date', 'calving date'),
     check('number_babys', 'Number of offspring must be at least 1').isInt({ min: 1 }),
     check('complication', 'Complication must be a boolean value').isBoolean(),
-    check('observations', 'Observations cannot exceed 150 characters').optional().isLength({ max: 150 }),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            // Log interno de errores de validación
-            console.warn("Calving validation failed:", errors.array());
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+    check('observations', 'Observations cannot exceed 150 characters').optional({ checkFalsy: true }).isLength({ max: 150 }),
+    handleValidationErrors
 ];
 
-const validateHealth = [
-    check('cattle_id', 'Invalid cattle identification').isMongoId(),
-    check('inspection_date', 'A valid date is required').isISO8601(),
+// Reglas para HEALTH
+export const validateHealth = [
+    cattleIdValidator,
+    dateValidator('inspection_date', 'inspection date'),
     check('state', 'State must be ILLNESS, INJURY, or CHECKUP').isIn(['ILLNESS', 'INJURY', 'CHECKUP']),
     check('dosage', 'Dosage must be a number').optional({ nullable: true }).isFloat({ min: 0 }),
-    check('diagnosis', 'Diagnosis cannot exceed 255 characters').optional().isLength({ max: 255 }),
-
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            // Log de error de validación
-            console.warn("Health record validation failed:", errors.array());
-            return res.status(400).json({ ok: false, errors: errors.array() });
-        }
-        next();
-    }
+    check('diagnosis', 'Diagnosis cannot exceed 255 characters').optional({ checkFalsy: true }).isLength({ max: 255 }),
+    handleValidationErrors
 ];
-export default {
-    validateRegister,
-    validateLogin,
-    validateBreed,
-    validateCattle,
-    validateVaccine,
-    validateRecord,
-    validateProduction,
-    validateCalving,
-    validateHealth
-}
+
