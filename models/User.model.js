@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: ['ADMIN', 'COLLABORATOR', 'INVITADO'],
-        default: 'VISITANTE'
+        default: 'INVITADO'
     },
     state: {
         type: String,

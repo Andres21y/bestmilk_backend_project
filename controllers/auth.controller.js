@@ -49,7 +49,7 @@ export const signup = async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
+        console.error(JSON.stringify(err, null, 2))
         res.status(500).json({ msg: "Error al registrar usuario", error: err.message });
     }
 
@@ -89,15 +89,14 @@ export const login = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                rol: user.rol
+                rol: user.rol,
+                state: user.state
             }
         });
 
     } catch (err) {
         console.error("Login Error:", err);
-        res.status(500).json({
-            msg: "Server error"
-        });
+        res.status(500).json({ msg: "Server error" });
     }
 };
 
