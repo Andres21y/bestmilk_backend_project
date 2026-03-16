@@ -38,7 +38,6 @@ app.use(mongoSanitize({
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10kb' }));
 
-
 // Rutas
 app.use('/api', mainRoutes);
 

@@ -3,7 +3,7 @@ import User from '../models/User.model.js';
 // Obtener todos los visitantes (solo admin)
 export const getUsers = async (req, res) => {
     try {
-        const users = await User.find({ role: 'visitor' }).select('-password');
+        const users = await User.find().select('-password');
         res.json(users);
     } catch (error) {
         res.status(500).json({ msg: "Error getting users" });

@@ -5,7 +5,7 @@ import { validateLogin, validateRegister } from '../middleware/validator.middlew
 
 const router = express.Router();
 
-// Limitador de peticiones para evitar fuerza bruta en login
+// Limitador de peticiones 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 100 // límite de 100 peticiones por IP
