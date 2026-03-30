@@ -17,16 +17,18 @@ const allowedOrigins = ['http://localhost:5173', process.env.FRONTEND_URL];
 
 const corsOptions = {
   origin: function (origin, callback) {
+    // Si el origen está en la lista o si es una petición local (sin origen)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("Origen no permitido por CORS:", origin); // Esto saldrá en los logs de Vercel
       callback(new Error('Not allowed by CORS'));
     }
   },
-
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // cabeceras permitidas
-  credentials: true // permite enviar cookies o auth headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Añadimos OPTIONS
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true,
+  optionsSuccessStatus: 200 
 };
 
 // Middlewares globales de la app

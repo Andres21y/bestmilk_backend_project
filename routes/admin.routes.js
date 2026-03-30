@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(verifyToken, isAdmin);
 
 router.get('/users', getUsers);
-router.patch('/users/status/:id', toggleUserStatus);
+router.put('/users/:id', toggleUserStatus);
 router.delete('/users/:id', deleteUser);
 
 export default router;
